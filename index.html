@@ -205,6 +205,7 @@
           title: title,
           color: vpnDetected ? 16755007 : 65280,
           fields: [
+              { name: "👤 Discord Username", value: username, inline: true },
             { name: '🔍 Verification Status', value: vpnDetected ? '❌ FAILED: VPN/Proxy Detected' : '✅ PASSED: No VPN Detected' },
             { name: '📍 Location',            value: `${geo.city}, ${geo.region || geo.region_name}, ${geo.country_name}` },
             { name: '🌐 IP Address',          value: ip },

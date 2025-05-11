@@ -2,3 +2,4 @@
 
 News
 Our fucking wehook GOT NUKED
+new wehhook cause our got nuked by some kid

